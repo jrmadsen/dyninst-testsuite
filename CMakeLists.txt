@@ -97,16 +97,7 @@ set(INSTALL_DIR "bin/testsuite" CACHE PATH "Testsuite installation directory")
 # Build rules for the test libraries (libtestdyninst, libtestproccontrol, etc.)
 # and the executables
 
-if(UNIX)
   enable_language(ASM-ATT)
-elseif(WIN32)
-  enable_language(ASM_MASM)
-  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER 19)
-    add_definitions(-D_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS=1)
-  else()
-    add_definitions(-Dsnprintf=_snprintf)
-  endif()
-endif()
 
 foreach(def ${DYNINST_INTERNAL_DEFINES})
   # add_definitions doesn't seem to get pulled in; that's okay, since we don't
@@ -175,20 +166,10 @@ add_library(DatabaseOutputDriver SHARED src/DatabaseOutputDriver.C)
 target_link_libraries(DatabaseOutputDriver testSuite)
 set_target_properties(DatabaseOutputDriver PROPERTIES PREFIX "")
 
-if(WIN32)
-  set_target_properties(DatabaseOutputDriver
-                        PROPERTIES COMPILE_DEFINITIONS os_windows_test)
-  target_link_libraries(DatabaseOutputDriver ws2_32)
-endif()
-
-if(WIN32)
-  set(PLAT_SRC)
-else()
-  set(PLAT_SRC
-      src/dyninst/ParseThat.C
-      src/dyninst/test_lib_test7.C
-      src/dyninst/test_lib_test9.C)
-endif()
+set(PLAT_SRC
+    src/dyninst/ParseThat.C
+    src/dyninst/test_lib_test7.C
+    src/dyninst/test_lib_test9.C)
 
 set(COMPLIB_DEFS TESTLIB_DLL_BUILD COMPLIB_DLL_BUILD)
 
@@ -243,14 +224,6 @@ endif()
 if(TARGET pcontrol)
   add_library(testproccontrol SHARED src/proccontrol/proccontrol_comp.C)
 
-  if(WIN32)
-    target_link_libraries(testproccontrol
-                          testSuite
-                          pcontrol
-                          common
-                          ${CMAKE_THREAD_LIBS_INIT}
-                          ws2_32)
-  else()
     target_link_libraries(testproccontrol
                           testlaunch
                           testSuite
@@ -258,23 +231,15 @@ if(TARGET pcontrol)
                           common
                           ${Boost_SYSTEM_LIBRARY_RELEASE}
                           ${CMAKE_THREAD_LIBS_INIT})
-  endif()
+
   install(TARGETS testproccontrol DESTINATION ${INSTALL_DIR})
   set_target_properties(testproccontrol
                         PROPERTIES COMPILE_DEFINITIONS "${COMPLIB_DEFS}")
 endif()
 
-if(WIN32)
-  set(RUNTESTS_UTILS src/runTests-utils-nt.C)
-else()
   set(RUNTESTS_UTILS src/runTests-utils.C)
-endif()
 
-if(WIN32)
-  set(TD_BE)
-else()
   set(TD_BE src/testdriver_be.C)
-endif()
 
 add_executable(runTests
                src/runTests.C
@@ -294,12 +259,8 @@ if(LAUNCHMON_FE_LIBRARIES)
   target_link_libraries(test_driver ${LAUNCHMON_BE_LIBRARIES})
 endif()
 
-if(WIN32)
-
-else()
   add_executable(testdriver_wrapper src/connection.C src/testdriver_wrapper.C)
   install(TARGETS testdriver_wrapper DESTINATION ${INSTALL_DIR})
-endif()
 
 install(TARGETS test_driver
                 runTests
@@ -313,17 +274,11 @@ foreach(m ${MUTATOR_NAME_LIST})
   file(APPEND ${CMAKE_BINARY_DIR}/test_names.txt "${m}\n")
 endforeach()
 
-if(UNIX)
   # Compiler macros
   find_program(M_gnu_cc NAMES ${CMAKE_MUT_C_COMPILER} ${CMAKE_C_COMPILER} gcc)
   message(STATUS "Mutatee gcc: ${M_gnu_cc}")
   find_program(M_gnu_cxx NAMES ${CMAKE_MUT_CXX_COMPILER} ${CMAKE_CXX_COMPILER} g++)
   message(STATUS "Mutatee g++: ${M_gnu_cxx}")
-elseif(WIN32)
-  find_program(M_native_cc NAMES cl)
-  find_program(M_native_cxx NAMES cl)
-  find_program(M_native_linker NAMES link)
-endif()
 
 include(checkMutateeCompiler.cmake)
 
