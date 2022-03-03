@@ -147,13 +147,6 @@ if(UNIX)
   add_library(testlaunch SHARED ${LIBTESTLAUNCH_SRCS})
   target_link_libraries(testlaunch ${LibXml2_LIBRARIES} testSuite)
   set(TESTSUITE_TESTLAUNCH_LINK testSuite testlaunch)
-else()
-  add_library(testSuite
-              SHARED
-              src/test_lib_dllExecution.C
-              ${LIBTESTSUITE_COMMON_SRCS}
-              ${LIBTESTLAUNCH_SRCS})
-  set(TESTSUITE_TESTLAUNCH_LINK testSuite)
 endif()
 add_dependencies(testSuite LibXml2)
 
