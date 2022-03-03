@@ -139,7 +139,6 @@ set(LIBTESTLAUNCH_SRCS
     src/StdOutputDriver.C
     src/JUnitOutputDriver.cpp)
 
-if(UNIX)
   add_library(testSuite
               SHARED
               src/test_lib_soExecution.C
@@ -147,7 +146,6 @@ if(UNIX)
   add_library(testlaunch SHARED ${LIBTESTLAUNCH_SRCS})
   target_link_libraries(testlaunch ${LibXml2_LIBRARIES} testSuite)
   set(TESTSUITE_TESTLAUNCH_LINK testSuite testlaunch)
-endif()
 add_dependencies(testSuite LibXml2)
 
 set_target_properties(${TESTSUITE_TESTLAUNCH_LINK}
@@ -282,7 +280,6 @@ add_library(testB_static STATIC src/libtestB.c)
 set_target_properties(testA_static PROPERTIES OUTPUT_NAME testA)
 set_target_properties(testB_static PROPERTIES OUTPUT_NAME testB)
 
-if(UNIX)
   add_library(Test12 SHARED src/dyninst/libTest12.c)
   add_library(dyninstAPI_RT SHARED IMPORTED)
   set(_path_suffixes dyninst)
@@ -297,7 +294,6 @@ if(UNIX)
           LIBRARY DESTINATION ${INSTALL_DIR}
           RUNTIME DESTINATION ${INSTALL_DIR}
           ARCHIVE DESTINATION ${INSTALL_DIR})
-endif()
 
 install(TARGETS testA
                 testB
@@ -307,7 +303,6 @@ install(TARGETS testA
         RUNTIME DESTINATION ${INSTALL_DIR}
         ARCHIVE DESTINATION ${INSTALL_DIR})
 
-if(UNIX)
   check_mutatee_compiler(${M_gnu_cc} "-m32" "-m32" C "" m32_works)
   if(${m32_works})
     message(STATUS "Building 32-bit helper libraries")
@@ -336,6 +331,5 @@ if(UNIX)
                                      LINK_FLAGS
                                      "-m32")
   endif()
-endif()
 
 include(${DYNINST_PLATFORM}/cmake-mutatees.txt)
